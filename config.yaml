@@ -1,0 +1,85 @@
+
+project:
+  name: quant-india-ts-ml
+  seed: 42
+  log_level: INFO
+
+data:
+  price_source_priority: ["yfinance"]
+  start_date: "2010-01-01"
+  interval: "1d"
+  cache_dir: "data/raw"
+  processed_dir: "data/processed"
+  manifest_path: "experiments/dataset_manifest.json"
+  exogenous_tickers:
+    nifty: "^NSEI"
+    sensex: "^BSESN"
+    usdinr: "USDINR=X"
+    crude: "CL=F"
+  fundamentals_filters:
+    debt_to_revenue_max: 1.0
+    debt_to_equity_max: 2.0
+
+features:
+  horizons: [1, 5, 10, 30]
+  target_type: "log_return"
+  lookback_window: 60
+  tech:
+    sma: [5, 20, 50]
+    ema: [9, 21, 50, 200]
+    rsi: 14
+    macd: [12, 26, 9]
+    bbands: [20, 2]
+    atr: 14
+    obv: true
+    adx: 14
+    stoch: [14, 3]
+  vol:
+    rolling_std_windows: [10, 20]
+    volume_ma_windows: [10, 20]
+  calendar: true
+  fibonacci: true
+
+modeling:
+  models: ["rf", "xgb", "lstm", "bilstm", "gru"]
+  train_val_splits: 4
+  test_fraction: 0.2
+  min_train_period_days: 1000
+  batch_size: 64
+  epochs: 20
+  early_stopping_patience: 3
+  learning_rate: 0.001
+  weight_decay: 0.0
+  hidden_size: 64
+  num_layers: 2
+
+hyperopt:
+  enabled: true
+  max_trials: 20
+
+backtest:
+  transaction_cost_bps: 10
+  slippage_bps: 5
+  position_sizing: "fixed_fraction"
+  fixed_fraction: 1.0
+  kelly_fraction_cap: 0.25
+  risk_free_rate_annual: 0.05
+
+acceptance:
+  max_iter: 100
+  min_directional_accuracy: 0.6
+  min_sharpe: 1.0
+  min_cagr: 0.0
+  min_num_stocks: 3
+  rolling_windows_required: 3
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  default_horizon: 5
+  results_dir: "experiments/api_results"
+
+retrain:
+  frequency: "weekly"
+  monitor_threshold_drop_pct: 20
+
